@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magaya HTML to Excel Converter - PRO Visual</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="font-sans text-slate-800">
+
+    <header class="bg-gradient-to-r from-slate-900 to-blue-900 text-white shadow-xl">
+        <div class="container mx-auto px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10">
+                    <i class="fas fa-file-invoice-dollar text-2xl text-yellow-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide text-white">CONVERTIDOR EJECUTIVO</h1>
+                    <p class="text-xs text-blue-200 font-medium tracking-wider uppercase">Herramienta Logística Profesional</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-xs font-semibold bg-blue-950/50 px-4 py-1.5 rounded-full border border-blue-700/50">
+                <i class="fas fa-check-circle text-green-400"></i>
+                <span>v4.2 Quotes</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 max-w-5xl">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+            <section class="p-8 border-b border-gray-100 bg-gradient-to-b from-white to-gray-50/50" aria-labelledby="section-title">
+                <h2 id="section-title" class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-wand-magic-sparkles text-blue-600"></i>
+                    Generar Reporte Excel
+                </h2>
+                <p id="daily-quote" class="text-gray-500 text-lg italic border-l-4 border-blue-500 pl-4">
+                    Cargando frase de inspiración...
+                </p>
+            </section>
+
+            <section class="p-8" aria-label="Zona de carga y resultados">
+                <div id="drop-zone" class="border-4 border-dashed border-gray-200 rounded-2xl h-72 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50/30 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10"></div>
+                    <div class="bg-blue-100 p-5 rounded-full mb-5 group-hover:scale-110 transition-transform duration-300 shadow-sm ring-4 ring-blue-50">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-blue-600"></i>
+                    </div>
+                    <p class="text-xl font-bold text-gray-700 mb-2">Arrastra tu archivo HTML aquí</p>
+                    <p class="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">Soporta archivos .html y .htm</p>
+                    <input type="file" id="file-input" accept=".html,.htm" class="hidden">
+                </div>
+
+                <div id="result-area" class="hidden mt-8 animate-fade-in">
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6 flex items-center justify-between mb-6 shadow-sm">
+                        <div class="flex items-center gap-5">
+                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600 shadow-sm border border-emerald-200">
+                                <i class="fas fa-check-circle text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-emerald-900 text-lg">¡Archivo Procesado Exitosamente!</h3>
+                                <p id="file-name-display" class="text-sm text-emerald-700 font-medium break-all">archivo.html</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="text-xs bg-emerald-200/50 text-emerald-800 px-2 py-1 rounded border border-emerald-200 font-semibold" id="output-name-preview">NOMBRE ORIGINAL.xlsx</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="download-btn" type="button" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 text-lg">
+                        <i class="fas fa-file-excel text-2xl"></i>
+                        <span>DESCARGAR EXCEL PROFESIONAL</span>
+                    </button>
+
+                    <button id="reset-btn" type="button" class="w-full mt-4 text-gray-400 hover:text-blue-600 text-sm font-medium transition-colors flex items-center justify-center gap-2 py-2">
+                        <i class="fas fa-redo"></i> Convertir otro archivo
+                    </button>
+                </div>
+
+                <div id="error-area" class="hidden mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3 animate-fade-in">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                    <span id="error-msg">Error al procesar el archivo.</span>
+                </div>
+            </section>
+        </div>
+
+        <footer class="mt-8 text-center">
+            <p class="text-xs text-gray-400 font-mono">
+                Procesamiento local seguro • No se envían datos a la nube
+            </p>
+        </footer>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
