@@ -1,99 +1,716 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magaya HTML to Excel Converter - PRO Visual</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aldepositos Panama - Sistema de Reportes</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SheetJS + Styles -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .drag-active { border-color:#3b82f6; background-color:#eff6ff; transform:scale(1.01); }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+    .animate-fade-in { animation:fadeIn 0.4s ease-out forwards; }
+    .loader { border:4px solid #f3f3f3; border-top:4px solid #3b82f6; border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite; }
+    @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+    body { background-color:#f8fafc; }
+  </style>
 </head>
 <body class="font-sans text-slate-800">
 
-    <header class="bg-gradient-to-r from-slate-900 to-blue-900 text-white shadow-xl">
-        <div class="container mx-auto px-6 py-5 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10">
-                    <i class="fas fa-file-invoice-dollar text-2xl text-yellow-400"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-wide text-white">CONVERTIDOR EJECUTIVO</h1>
-                    <p class="text-xs text-blue-200 font-medium tracking-wider uppercase">Herramienta Logística Profesional</p>
-                </div>
-            </div>
-            <div class="hidden md:flex items-center gap-2 text-xs font-semibold bg-blue-950/50 px-4 py-1.5 rounded-full border border-blue-700/50">
-                <i class="fas fa-check-circle text-green-400"></i>
-                <span>v4.2 Quotes</span>
-            </div>
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-slate-900 to-blue-900 text-white shadow-xl">
+    <div class="container mx-auto px-6 py-5 flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10 shadow-inner">
+          <i class="fas fa-warehouse text-2xl text-yellow-400"></i>
         </div>
-    </header>
+        <div>
+          <h1 class="text-2xl font-bold tracking-wide text-white uppercase flex items-center gap-2">
+            Aldepositos Panama, S.A.
+            <i class="fas fa-check-circle text-xs text-blue-400" title="Verificado"></i>
+          </h1>
+          <p class="text-xs text-blue-200 font-medium tracking-wider uppercase flex items-center gap-1">
+            <i class="fas fa-network-wired text-[10px]"></i>
+            Sistema de Gestión de Reportes
+          </p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 text-xs font-semibold bg-blue-950/50 px-4 py-1.5 rounded-full border border-blue-700/50 shadow-lg">
+        <i class="fas fa-gem text-yellow-300"></i>
+        <span>v8.5 Pro Edition</span>
+      </div>
+    </div>
+  </header>
 
-    <main class="container mx-auto px-6 py-12 max-w-5xl">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-            <section class="p-8 border-b border-gray-100 bg-gradient-to-b from-white to-gray-50/50" aria-labelledby="section-title">
-                <h2 id="section-title" class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-wand-magic-sparkles text-blue-600"></i>
-                    Generar Reporte Excel
-                </h2>
-                <p id="daily-quote" class="text-gray-500 text-lg italic border-l-4 border-blue-500 pl-4">
-                    Cargando frase de inspiración...
+  <main class="container mx-auto px-6 py-12 max-w-5xl">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+      <!-- Título + Frase -->
+      <div class="p-8 border-b border-gray-100 bg-gradient-to-b from-white to-gray-50/50">
+        <div class="flex justify-between items-start">
+          <div class="w-full">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+              <span class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                <i class="fas fa-file-invoice-dollar"></i>
+              </span>
+              Conversión de Inventario
+            </h2>
+            <div class="flex items-start gap-3 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <i class="fas fa-quote-left text-blue-300 text-xl mt-1"></i>
+              <div class="flex-1">
+                <p id="daily-quote" class="text-gray-600 text-lg italic font-medium leading-relaxed">
+                  Cargando inspiración...
                 </p>
-            </section>
+              </div>
+              <button
+                id="new-quote-btn"
+                class="text-xs bg-white border border-gray-200 text-gray-400 hover:text-blue-600 hover:border-blue-300 h-8 w-8 rounded-full transition-all shadow-sm flex items-center justify-center"
+                title="Nueva frase"
+              >
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <section class="p-8" aria-label="Zona de carga y resultados">
-                <div id="drop-zone" class="border-4 border-dashed border-gray-200 rounded-2xl h-72 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50/30 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10"></div>
-                    <div class="bg-blue-100 p-5 rounded-full mb-5 group-hover:scale-110 transition-transform duration-300 shadow-sm ring-4 ring-blue-50">
-                        <i class="fas fa-cloud-upload-alt text-5xl text-blue-600"></i>
-                    </div>
-                    <p class="text-xl font-bold text-gray-700 mb-2">Arrastra tu archivo HTML aquí</p>
-                    <p class="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">Soporta archivos .html y .htm</p>
-                    <input type="file" id="file-input" accept=".html,.htm" class="hidden">
-                </div>
+      <div class="p-8">
+        <!-- Drop Zone -->
+        <div
+          id="drop-zone"
+          class="border-4 border-dashed border-gray-200 rounded-2xl h-80 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50/30 group relative overflow-hidden bg-slate-50/50"
+        >
+          <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10"></div>
 
-                <div id="result-area" class="hidden mt-8 animate-fade-in">
-                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6 flex items-center justify-between mb-6 shadow-sm">
-                        <div class="flex items-center gap-5">
-                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600 shadow-sm border border-emerald-200">
-                                <i class="fas fa-check-circle text-3xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-emerald-900 text-lg">¡Archivo Procesado Exitosamente!</h3>
-                                <p id="file-name-display" class="text-sm text-emerald-700 font-medium break-all">archivo.html</p>
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    <span class="text-xs bg-emerald-200/50 text-emerald-800 px-2 py-1 rounded border border-emerald-200 font-semibold" id="output-name-preview">NOMBRE ORIGINAL.xlsx</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+          <!-- Contenido Normal -->
+          <div id="drop-content" class="flex flex-col items-center z-10">
+            <div class="bg-white p-6 rounded-full mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg ring-8 ring-blue-50 border border-blue-100">
+              <i class="fas fa-cloud-upload-alt text-6xl text-blue-600"></i>
+            </div>
+            <p class="text-xl font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <i class="fas fa-file-import text-blue-500"></i>
+              Cargar Reporte de Magaya (HTML)
+            </p>
+            <p class="text-sm text-gray-400 bg-white px-4 py-1.5 rounded-full border border-gray-200 shadow-sm flex items-center gap-2">
+              <i class="fas fa-code text-gray-300"></i>
+              Soporta archivos .html y .htm
+            </p>
+          </div>
 
-                    <button id="download-btn" type="button" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 text-lg">
-                        <i class="fas fa-file-excel text-2xl"></i>
-                        <span>DESCARGAR EXCEL PROFESIONAL</span>
-                    </button>
+          <!-- Loader -->
+          <div id="loading-state" class="hidden flex-col items-center z-10">
+            <div class="loader mb-4"></div>
+            <p class="text-blue-600 font-semibold animate-pulse flex items-center gap-2">
+              <i class="fas fa-cog fa-spin"></i>
+              Procesando datos...
+            </p>
+          </div>
 
-                    <button id="reset-btn" type="button" class="w-full mt-4 text-gray-400 hover:text-blue-600 text-sm font-medium transition-colors flex items-center justify-center gap-2 py-2">
-                        <i class="fas fa-redo"></i> Convertir otro archivo
-                    </button>
-                </div>
-
-                <div id="error-area" class="hidden mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3 animate-fade-in">
-                    <i class="fas fa-exclamation-triangle text-xl"></i>
-                    <span id="error-msg">Error al procesar el archivo.</span>
-                </div>
-            </section>
+          <input type="file" id="file-input" accept=".html,.htm" class="hidden">
         </div>
 
-        <footer class="mt-8 text-center">
-            <p class="text-xs text-gray-400 font-mono">
-                Procesamiento local seguro • No se envían datos a la nube
-            </p>
-        </footer>
-    </main>
+        <!-- Resultados -->
+        <div id="result-area" class="hidden mt-8 animate-fade-in">
+          <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6 flex items-center justify-between mb-6 shadow-sm relative overflow-hidden">
+            <i class="fas fa-check absolute -right-6 -bottom-6 text-9xl text-emerald-100/50 transform rotate-12"></i>
+            <div class="flex items-center gap-5 z-10">
+              <div class="bg-emerald-100 p-4 rounded-full text-emerald-600 shadow-sm border border-emerald-200">
+                <i class="fas fa-clipboard-check text-3xl"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-emerald-900 text-lg flex items-center gap-2">
+                  ¡Reporte Generado con Éxito!
+                </h3>
+                <p class="text-sm text-emerald-700 font-medium break-all mt-1 flex items-center gap-2">
+                  <i class="far fa-file-code"></i>
+                  <span id="file-name-display">archivo.html</span>
+                </p>
+                <div class="flex flex-wrap gap-2 mt-3">
+                  <span
+                    class="text-xs bg-white text-emerald-800 px-3 py-1 rounded-full border border-emerald-200 font-semibold flex items-center gap-1"
+                    id="output-name-preview"
+                  >
+                    <i class="fas fa-file-export"></i>
+                    TE.xlsx / TE.pdf
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-    <script src="./app.js" defer></script>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              id="download-excel-btn"
+              class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-300/50 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 text-lg group"
+            >
+              <div class="bg-white/20 p-2 rounded-lg group-hover:bg-white/30 transition-colors">
+                <i class="fas fa-file-excel text-2xl"></i>
+              </div>
+              <div class="flex flex-col items-start">
+                <span class="text-xs font-light opacity-90 uppercase tracking-wider">Formato Editable</span>
+                <span>DESCARGAR EXCEL</span>
+              </div>
+            </button>
+
+            <button
+              id="download-pdf-btn"
+              class="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 text-lg group"
+            >
+              <div class="bg-white/20 p-2 rounded-lg group-hover:bg-white/30 transition-colors">
+                <i class="fas fa-file-pdf text-2xl"></i>
+              </div>
+              <div class="flex flex-col items-start">
+                <span class="text-xs font-light opacity-90 uppercase tracking-wider">Formato Impresión</span>
+                <span>DESCARGAR PDF</span>
+              </div>
+            </button>
+          </div>
+
+          <button
+            id="reset-btn"
+            class="w-full mt-6 text-gray-400 hover:text-blue-600 text-sm font-medium transition-colors flex items-center justify-center gap-2 py-3 hover:bg-slate-50 rounded-lg"
+          >
+            <i class="fas fa-redo-alt"></i>
+            Procesar otro archivo
+          </button>
+        </div>
+
+        <!-- Error -->
+        <div
+          id="error-area"
+          class="hidden mt-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3 animate-fade-in shadow-sm"
+        >
+          <div class="bg-red-100 p-2 rounded-full">
+            <i class="fas fa-exclamation-triangle text-xl"></i>
+          </div>
+          <span id="error-msg" class="font-medium">Error al procesar el archivo.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center flex flex-col items-center gap-2">
+      <p class="text-xs text-gray-400 font-mono flex items-center gap-2">
+        <i class="fas fa-building"></i>
+        Aldepositos Panama, S.A.
+        <span class="opacity-50">|</span>
+        <i class="fas fa-lock"></i>
+        Procesamiento Seguro
+        <span class="opacity-50">|</span>
+        <i class="fas fa-server"></i>
+        Local Serverless
+      </p>
+    </div>
+  </main>
+
+  <script>
+    // --- Referencias ---
+    const dropZone = document.getElementById('drop-zone');
+    const dropContent = document.getElementById('drop-content');
+    const loadingState = document.getElementById('loading-state');
+    const fileInput = document.getElementById('file-input');
+    const resultArea = document.getElementById('result-area');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const outputNamePreview = document.getElementById('output-name-preview');
+    const downloadExcelBtn = document.getElementById('download-excel-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const newQuoteBtn = document.getElementById('new-quote-btn');
+    const errorArea = document.getElementById('error-area');
+    const errorMsg = document.getElementById('error-msg');
+    const quoteElement = document.getElementById('daily-quote');
+
+    let parsedData = [];
+    let originalFileName = "Reporte";
+
+    const COLUMNS_TO_REMOVE = ["Piezas en Almacén", "Volumen en Almacén (m³)", "Peso en Almacén (kg)"];
+
+    // --- MOTOR DE FRASES ---
+    const subjects = ["La excelencia","El liderazgo","Nuestra calidad","La eficiencia","El trabajo duro","La disciplina","El compromiso","La innovación","La logística","El éxito","Tu esfuerzo","La perseverancia","Cada detalle","La precisión","El talento"];
+    const verbs = ["construye","impulsa","garantiza","transforma","define","asegura","fortalece","inspira","crea","supera","eleva","maximiza","perfecciona","acelera","consolida"];
+    const connectors = ["el camino hacia","la base de","el futuro de","la esencia de","cada paso hacia","el motor de","la clave para","el secreto de","la ruta hacia","el estándar de","la visión de","el impacto en","el valor de"];
+    const goals = ["nuestras metas.","la satisfacción total.","un servicio superior.","el crecimiento continuo.","grandes resultados.","la excelencia operativa.","un futuro brillante.","nuestra reputación.","cada entrega exitosa.","la confianza del cliente.","un legado duradero.","la perfección logística."];
+    const famousQuotes = [
+      "“La excelencia no es un acto, sino un hábito.” – Aristóteles",
+      "“La calidad significa hacer lo correcto cuando nadie está mirando.” – Henry Ford",
+      "“El éxito es la suma de pequeños esfuerzos repetidos día tras día.” – Robert Collier",
+      "“No encuentres la falta, encuentra el remedio.” – Henry Ford",
+      "“La mejor manera de predecir el futuro es creándolo.” – Peter Drucker",
+      "“El único lugar donde el éxito viene antes que el trabajo es en el diccionario.” – Vidal Sassoon",
+      "“La logística es el arte de calcular lo necesario para la victoria.”",
+      "“Hacer lo común de forma poco común nos lleva al éxito.”",
+      "“La satisfacción del cliente es nuestra mejor estrategia de negocio.”",
+      "“Aldepositos Panama: donde la precisión se encuentra con la excelencia.”"
+    ];
+
+    function generateQuote() {
+      if (Math.random() < 0.3) {
+        return famousQuotes[Math.floor(Math.random() * famousQuotes.length)];
+      } else {
+        const s = subjects[Math.floor(Math.random() * subjects.length)];
+        const v = verbs[Math.floor(Math.random() * verbs.length)];
+        const c = connectors[Math.floor(Math.random() * connectors.length)];
+        const g = goals[Math.floor(Math.random() * goals.length)];
+        return `${s} ${v} ${c} ${g}`;
+      }
+    }
+
+    if (quoteElement) quoteElement.innerText = generateQuote();
+
+    // --- Eventos ---
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-active');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-active');
+      if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFileSelect(e.target.files[0]);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      resultArea.classList.add('hidden');
+      dropZone.classList.remove('hidden');
+      fileInput.value = '';
+      parsedData = [];
+      errorArea.classList.add('hidden');
+      quoteElement.innerText = generateQuote();
+    });
+
+    newQuoteBtn.addEventListener('click', () => {
+      quoteElement.style.opacity = 0;
+      setTimeout(() => {
+        quoteElement.innerText = generateQuote();
+        quoteElement.style.opacity = 1;
+      }, 200);
+    });
+
+    downloadExcelBtn.addEventListener('click', generateExcelPro);
+    downloadPdfBtn.addEventListener('click', generatePDFPro);
+
+    // --- Manejo de archivo ---
+    function handleFileSelect(file) {
+      dropContent.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      loadingState.classList.add('flex');
+      setTimeout(() => processFile(file), 100);
+    }
+
+    function processFile(file) {
+      originalFileName = file.name.replace(/\.[^/.]+$/, "").toUpperCase();
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          parseMagayaHTML(e.target.result);
+          loadingState.classList.add('hidden');
+          loadingState.classList.remove('flex');
+          dropContent.classList.remove('hidden');
+          dropZone.classList.add('hidden');
+          resultArea.classList.remove('hidden');
+          fileNameDisplay.textContent = file.name;
+          outputNamePreview.innerHTML = `<i class="fas fa-file-export"></i> ${originalFileName}.xlsx / .pdf`;
+          errorArea.classList.add('hidden');
+        } catch (err) {
+          console.error(err);
+          loadingState.classList.add('hidden');
+          loadingState.classList.remove('flex');
+          dropContent.classList.remove('hidden');
+          showError("Error al leer el archivo. Verifica el formato.");
+        }
+      };
+      reader.readAsText(file, "ISO-8859-1");
+    }
+
+    // --- Parsing Magaya ---
+    function parseMagayaHTML(htmlString) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlString, 'text/html');
+      parsedData = [];
+
+      const companyName = getCleanText(doc, '.docname') || "Reporte";
+      const titles = Array.from(doc.querySelectorAll('.title')).map(el => el.textContent.trim());
+      const reportDate = getCleanText(doc, 'td[align="right"]');
+
+      parsedData.push([companyName]);
+      titles.forEach(t => parsedData.push([t]));
+      if (reportDate) parsedData.push([reportDate]);
+
+      const tables = Array.from(doc.querySelectorAll('table'));
+      let dataTable = null;
+      let maxRows = 0;
+
+      for (let table of tables) {
+        const headerCells = table.querySelectorAll('td.sec.bar');
+        if (headerCells.length > 5) {
+          const rowCount = table.querySelectorAll('tr').length;
+          const hasNestedTables = table.querySelector('table') !== null;
+          if (!hasNestedTables || rowCount > maxRows) {
+            maxRows = rowCount;
+            dataTable = table;
+          }
+        }
+      }
+      if (!dataTable) {
+        for (let table of tables) {
+          if (table.querySelectorAll('td.sec.bar').length > 5) {
+            dataTable = table;
+            break;
+          }
+        }
+      }
+      if (!dataTable) throw new Error("No se encontró tabla de datos.");
+
+      let finalHeaders = [];
+      let activeIndices = [];
+
+      const headerCells = dataTable.querySelectorAll('td.sec.bar');
+      headerCells.forEach((cell, index) => {
+        const text = cell.textContent.trim();
+        if (!COLUMNS_TO_REMOVE.includes(text)) {
+          finalHeaders.push(text);
+          activeIndices.push(index);
+        }
+      });
+      parsedData.push(finalHeaders);
+
+      const rows = dataTable.querySelectorAll('tr');
+      let processingData = false;
+
+      rows.forEach(row => {
+        if (
+          row.querySelector('.docname') ||
+          row.querySelector('.title') ||
+          row.querySelector('table') ||
+          row.innerText.trim() === ''
+        ) return;
+
+        if (row.querySelector('.sec.bar')) {
+          processingData = true;
+          return;
+        }
+        if (!processingData) return;
+
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 0) return;
+
+        let rowData = [];
+        let isGroupRow = false;
+
+        const firstCellText = cells[0]?.textContent.trim();
+        if (firstCellText === companyName || titles.includes(firstCellText) || firstCellText === reportDate) return;
+
+        const hasUnderline = row.querySelector('u') !== null;
+        if (hasUnderline && firstCellText !== "Total") return;
+
+        const colspan = parseInt(cells[0].getAttribute('colspan') || "1", 10);
+        if (colspan > 5) isGroupRow = true;
+
+        if (isGroupRow) {
+          rowData = [firstCellText];
+          for (let i = 1; i < finalHeaders.length; i++) rowData.push("");
+        } else {
+          cells.forEach((cell, index) => {
+            if (activeIndices.includes(index)) {
+              let text = cell.textContent.trim().replace(/\u00A0/g, " ");
+              const isDate = /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(text);
+              if (!isDate && /^-?[\d,]+(\.\d+)?$/.test(text) && text !== "") {
+                const cleanNum = text.replace(/,/g, '');
+                !isNaN(parseFloat(cleanNum)) ? rowData.push(parseFloat(cleanNum)) : rowData.push(text);
+              } else {
+                rowData.push(text);
+              }
+            }
+          });
+        }
+
+        if (rowData.length > 0) {
+          if (firstCellText === "Total") {
+            const emptyRow = new Array(finalHeaders.length).fill("");
+            parsedData.push(emptyRow);
+          }
+          parsedData.push(rowData);
+        }
+      });
+    }
+
+    // --- Excel ---
+    function generateExcelPro() {
+      if (parsedData.length === 0) return;
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(parsedData);
+
+      const borderStyle = {
+        top: { style: "thin", color: { rgb: "BDBDBD" } },
+        bottom: { style: "thin", color: { rgb: "BDBDBD" } },
+        left: { style: "thin", color: { rgb: "BDBDBD" } },
+        right: { style: "thin", color: { rgb: "BDBDBD" } }
+      };
+
+      const styles = {
+        mainHeader: {
+          font: { bold: true, sz: 14, color: { rgb: "1E3A8A" }, name: "Calibri" },
+          alignment: { horizontal: "center", vertical: "center" }
+        },
+        subHeader: {
+          font: { bold: true, sz: 12, color: { rgb: "374151" }, name: "Calibri" },
+          alignment: { horizontal: "center", vertical: "center" }
+        },
+        tableHeader: {
+          fill: { fgColor: { rgb: "1E3A8A" } },
+          font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11, name: "Calibri" },
+          alignment: { horizontal: "center", vertical: "center", wrapText: true },
+          border: borderStyle
+        },
+        groupRow: {
+          fill: { fgColor: { rgb: "F3F4F6" } },
+          font: { bold: true, color: { rgb: "1D4ED8" }, sz: 11, name: "Calibri" },
+          border: borderStyle,
+          alignment: { horizontal: "left", vertical: "center" }
+        },
+        totalRow: {
+          fill: { fgColor: { rgb: "FEF9C3" } },
+          font: { bold: true, sz: 11, name: "Calibri" },
+          border: { top: { style: "double" }, bottom: { style: "medium" } },
+          alignment: { vertical: "center" }
+        },
+        normalCell: {
+          font: { name: "Calibri", sz: 11 },
+          border: borderStyle,
+          alignment: { vertical: "center" }
+        }
+      };
+
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      const headerRowIndex = 4;
+
+      const merges = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 9 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 9 } }
+      ];
+
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        const firstCellVal = ws[XLSX.utils.encode_cell({ r: R, c: 0 })]
+          ? ws[XLSX.utils.encode_cell({ r: R, c: 0 })].v
+          : "";
+        const isTotalRow = String(firstCellVal).trim() === "Total";
+        const secondCellVal = ws[XLSX.utils.encode_cell({ r: R, c: 1 })]
+          ? ws[XLSX.utils.encode_cell({ r: R, c: 1 })].v
+          : "";
+        const isGroupRow = R > headerRowIndex && firstCellVal && (!secondCellVal || secondCellVal === "") && !isTotalRow;
+
+        if (isGroupRow) merges.push({ s: { r: R, c: 0 }, e: { r: R, c: 9 } });
+
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+          if (!ws[cellRef]) continue;
+          let cell = ws[cellRef];
+
+          if (R === 0) cell.s = styles.mainHeader;
+          else if (R <= 3) cell.s = styles.subHeader;
+          else if (R === headerRowIndex) cell.s = styles.tableHeader;
+          else {
+            if (isTotalRow) {
+              cell.s = styles.totalRow;
+              if (typeof cell.v === 'number') cell.s.alignment = { horizontal: "right" };
+            } else if (isGroupRow) {
+              cell.s = styles.groupRow;
+            } else {
+              cell.s = JSON.parse(JSON.stringify(styles.normalCell));
+              if (typeof cell.v === 'number') {
+                cell.s.alignment = { horizontal: "right", vertical: "center" };
+                cell.z = "#,##0.00";
+              } else {
+                if (String(cell.v).includes("/")) cell.s.alignment = { horizontal: "center", vertical: "center" };
+              }
+
+              if (C === 1) {
+                cell.s.alignment = { horizontal: "center", vertical: "center" };
+                delete cell.z;
+              }
+              if (C === 5) {
+                cell.s.alignment = { horizontal: "left", vertical: "center" };
+              }
+              if (C === 6) {
+                cell.s.alignment = { horizontal: "center", vertical: "center" };
+                cell.z = "0";
+              }
+              if (C === 7 || C === 8) {
+                cell.s.alignment = { horizontal: "center", vertical: "center" };
+                if (typeof cell.v === 'number') {
+                  cell.z = (cell.v % 1 === 0) ? "0" : "0.00";
+                }
+              }
+            }
+          }
+        }
+      }
+
+      ws['!merges'] = merges;
+
+      const specificWidths = { 0: 10.57, 3: 27.57, 5: 17.57 };
+      ws['!cols'] = [];
+      const maxCol = Math.max(parsedData[4].length, 6);
+      for (let i = 0; i < maxCol; i++) {
+        if (specificWidths[i] !== undefined) ws['!cols'][i] = { wch: specificWidths[i] };
+        else ws['!cols'][i] = { wch: 10 };
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, "CARGA EN BODEGA");
+      XLSX.writeFile(wb, `${originalFileName}.xlsx`);
+    }
+
+    // --- PDF ---
+    function generatePDFPro() {
+      if (parsedData.length === 0) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('l', 'mm', 'legal');
+      doc.setProperties({
+        title: originalFileName,
+        author: 'Aldepositos Panama',
+        creator: 'Sistema de Reportes'
+      });
+
+      const companyName = parsedData[0][0] || "";
+      const reportTitle = parsedData[1][0] || "";
+      const dateRange = parsedData[2][0] || "";
+      const printDate = parsedData[3] ? parsedData[3][0] : "";
+
+      const headers = [parsedData[4]];
+      const body = parsedData.slice(5).map(row =>
+        row.map((cell, index) => {
+          if (index === 6 && typeof cell === 'number') return Math.round(cell);
+          if ((index === 7 || index === 8) && typeof cell === 'number') {
+            return (cell % 1 === 0) ? cell.toString() : cell.toFixed(2);
+          }
+          if (index === 1) return cell.toString();
+          return cell;
+        })
+      );
+
+      doc.autoTable({
+        head: headers,
+        body,
+        startY: 45,
+        theme: 'grid',
+        margin: { top: 45, bottom: 20, left: 10, right: 10 },
+        rowPageBreak: 'avoid',
+        styles: {
+          fontSize: 11,
+          cellPadding: 2.5,
+          valign: 'middle',
+          lineColor: [180, 180, 180],
+          lineWidth: 0.1,
+          font: "helvetica",
+          overflow: 'linebreak'
+        },
+        headStyles: {
+          fillColor: [30, 58, 138],
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center',
+          minCellHeight: 14,
+          valign: 'middle',
+          cellPadding: 3,
+          fontSize: 12
+        },
+        columnStyles: {
+          0: { cellWidth: 28 },
+          1: { halign: 'center', cellWidth: 25 },
+          2: { cellWidth: 28 },
+          3: { cellWidth: 'auto', minCellWidth: 40 },
+          4: { cellWidth: 'auto', minCellWidth: 40 },
+          5: { cellWidth: 45, halign: 'left' },
+          6: { halign: 'center', cellWidth: 20 },
+          7: { halign: 'center', cellWidth: 20 },
+          8: { halign: 'center', cellWidth: 20 }
+        },
+        didDrawPage: function () {
+          const pageSize = doc.internal.pageSize;
+          const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+          const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+
+          doc.setFontSize(20);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(30, 58, 138);
+          doc.text(companyName, pageWidth / 2, 18, { align: 'center' });
+
+          doc.setFontSize(14);
+          doc.setTextColor(60, 60, 60);
+          doc.setFont("helvetica", "normal");
+          doc.text(reportTitle, pageWidth / 2, 26, { align: 'center' });
+          doc.text(dateRange, pageWidth / 2, 33, { align: 'center' });
+
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          const now = new Date().toLocaleString("es-ES", { dateStyle: 'medium', timeStyle: 'short' });
+          const dateStr = printDate
+            ? `Reporte: ${printDate} | Generado: ${now}`
+            : `Generado: ${now}`;
+          doc.text(dateStr, 14, pageHeight - 10);
+          doc.text(
+            "Página " + doc.internal.getCurrentPageInfo().pageNumber,
+            pageWidth - 20,
+            pageHeight - 10,
+            { align: 'right' }
+          );
+        },
+        didParseCell: function (data) {
+          const rowRaw = data.row.raw;
+          const firstVal = rowRaw[0];
+          const secondVal = rowRaw[1];
+          const isTotal = String(firstVal) === "Total";
+          const isEmptyRow = rowRaw.every(cell => cell === "");
+
+          if (isTotal) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [254, 249, 195];
+            data.cell.styles.textColor = [0, 0, 0];
+          } else if (isEmptyRow) {
+            data.cell.styles.lineWidth = 0;
+            data.cell.styles.fillColor = 255;
+            data.cell.styles.minCellHeight = 5;
+          } else if (firstVal && (!secondVal || secondVal === "") && rowRaw.length > 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [229, 231, 235];
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontSize = 12;
+            if (data.column.index === 0) data.cell.colSpan = data.row.cells.length;
+          }
+        }
+      });
+
+      doc.save(`${originalFileName}.pdf`);
+    }
+
+    function getCleanText(doc, selector) {
+      const el = doc.querySelector(selector);
+      return el ? el.textContent.trim() : null;
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorArea.classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
-
 
